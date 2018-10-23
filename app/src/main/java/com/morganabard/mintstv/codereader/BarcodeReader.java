@@ -22,6 +22,7 @@ public class BarcodeReader extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().hide();
         setContentView(R.layout.activity_barcode_reader);
         scan_btn = (Button) findViewById(R.id.scan_btn);
         final Activity activity = this;

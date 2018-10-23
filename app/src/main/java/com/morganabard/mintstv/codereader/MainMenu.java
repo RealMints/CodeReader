@@ -16,6 +16,7 @@ public class MainMenu extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().hide();
         setContentView(R.layout.activity_main_menu);
         QR_btn = (Button) findViewById(R.id.QR_btn);
         final Activity activity = this;
