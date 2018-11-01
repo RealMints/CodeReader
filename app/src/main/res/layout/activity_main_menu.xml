@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".MainMenu">
 
+
     <Button
         android:id="@+id/QR_btn"
         android:layout_width="531dp"
@@ -28,5 +29,43 @@
         app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
+
+    <Button
+        android:id="@+id/SIGNIN_btn"
+        android:layout_width="531dp"
+        android:layout_height="70dp"
+        android:layout_marginBottom="456dp"
+        android:text="Login"
+        android:textSize="25dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <Button
+        android:id="@+id/signout_txt"
+        android:layout_width="531dp"
+        android:layout_height="70dp"
+        android:layout_marginBottom="384dp"
+        android:text="Logout"
+        android:textSize="25dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+
+    <TextView
+        android:id="@+id/currentUserText"
+        android:layout_width="387dp"
+        android:layout_height="52dp"
+        android:gravity="center_vertical"
+        android:text="Logged in User"
+        android:textAlignment="center"
+        app:layout_editor_absoluteX="0dp"
+        app:layout_editor_absoluteY="321dp" />
+
+
+
 
 </android.support.constraint.ConstraintLayout>

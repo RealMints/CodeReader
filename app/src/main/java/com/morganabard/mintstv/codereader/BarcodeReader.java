@@ -31,7 +31,7 @@ public class BarcodeReader extends AppCompatActivity {
             public void onClick(View view)
             {
                 IntentIntegrator integrator = new IntentIntegrator(activity);
-                integrator.setDesiredBarcodeFormats(IntentIntegrator.DATA_MATRIX_TYPES);
+                integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
                 integrator.setPrompt(" ");
                 integrator.setCameraId(0);
                 integrator.setBeepEnabled(false);

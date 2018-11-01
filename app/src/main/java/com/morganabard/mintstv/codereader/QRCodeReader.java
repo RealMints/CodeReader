@@ -15,12 +15,14 @@ import com.google.zxing.integration.android.IntentResult;
 
 public class QRCodeReader extends AppCompatActivity {
     private Button scan_btn;
-
+    private Button save_btn;
+    private String resultText;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qrcode_reader);
         scan_btn = (Button) findViewById(R.id.scan_btn);
+        save_btn = (Button) findViewById(R.id.save_btn);
         final Activity activity = this;
         scan_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -33,6 +35,13 @@ public class QRCodeReader extends AppCompatActivity {
                 integrator.setBeepEnabled(false);
                 integrator.setBarcodeImageEnabled(false);
                 integrator.initiateScan();
+            }
+        });
+        save_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                //Use firebase to save last text.
             }
         });
     }
@@ -100,6 +109,7 @@ public class QRCodeReader extends AppCompatActivity {
         }
         TextView otext = (TextView)findViewById(R.id.output_text);
         otext.setText(result.getContents().toString());
+        resultText = result.getContents().toString();
         super.onActivityResult(requestCode, resultCode, data);
     }
 }
