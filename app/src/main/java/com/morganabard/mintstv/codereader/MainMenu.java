@@ -15,6 +15,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 public class MainMenu extends AppCompatActivity {
     private Button QR_btn;
     private Button BAR_btn;
+    private Button QRList_btn;
     private Button SIGNIN_btn;
     private FirebaseAuth firebaseAuth;
     private TextView currentUserText;
@@ -23,12 +24,12 @@ public class MainMenu extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getSupportActionBar().hide();
         setContentView(R.layout.activity_main_menu);
 
         QR_btn = (Button) findViewById(R.id.QR_btn);
         SIGNIN_btn = (Button) findViewById(R.id.SIGNIN_btn);
         BAR_btn = (Button) findViewById(R.id.BAR_btn);
+        QRList_btn = (Button) findViewById(R.id.QR_List_btn);
         signout_txt = (Button) findViewById(R.id.signout_txt);
 
         firebaseAuth = firebaseAuth.getInstance();
@@ -60,6 +61,14 @@ public class MainMenu extends AppCompatActivity {
             public void onClick(View view)
             {
                 startActivity(new Intent(MainMenu.this, Login.class));
+            }
+        });
+
+        QRList_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                startActivity(new Intent(MainMenu.this, QRCodeSavedList.class));
             }
         });
 

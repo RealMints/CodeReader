@@ -10,6 +10,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -17,12 +21,25 @@ public class QRCodeReader extends AppCompatActivity {
     private Button scan_btn;
     private Button save_btn;
     private String resultText;
+    private TextView otext;
+    private String codeType;
+
+    private DatabaseReference databaseReference;
+    private FirebaseAuth firebaseAuth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qrcode_reader);
+        resultText = null;
+        codeType = null;
         scan_btn = (Button) findViewById(R.id.scan_btn);
         save_btn = (Button) findViewById(R.id.save_btn);
+
+        firebaseAuth = firebaseAuth.getInstance();
+
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+
         final Activity activity = this;
         scan_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,7 +58,25 @@ public class QRCodeReader extends AppCompatActivity {
             @Override
             public void onClick(View view)
             {
-                //Use firebase to save last text.
+
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if(user == null)
+                {
+                    Toast.makeText(QRCodeReader.this, "This code has NOT been saved. Please login to save codes.", Toast.LENGTH_LONG).show();
+                }else if(resultText == null || codeType == null)
+                {
+                    Toast.makeText(QRCodeReader.this, "No Code has been scanned. Please scan a QR-Code.", Toast.LENGTH_LONG).show();
+                }else
+                {
+                    String qrType = codeType;
+                    String qrData = otext.getText().toString();
+
+                    savedQRCodes savedCodes = new savedQRCodes(qrType, qrData);
+
+                    databaseReference.child(user.getUid()).setValue(savedCodes);
+                    Toast.makeText(QRCodeReader.this, "This code has been saved!", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
     }
@@ -67,12 +102,16 @@ public class QRCodeReader extends AppCompatActivity {
         }
         if(result.getContents().toString().contains("http") && result.getContents().toString().contains("MATMSG:") == false)
         {
+            codeType = "Website";
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(result.getContents().toString()));
             startActivity(intent);
+
         }
         //Opening email app
         if(result.getContents().toString().contains("MATMSG:"))
         {
+            codeType = "Email";
+
             //3 Tokens will be made, tokens[0], tokens[1], tokens[2]
             String delims1 = ";";
             String[] tokens = result.toString().split(delims1);
@@ -97,6 +136,8 @@ public class QRCodeReader extends AppCompatActivity {
         //Opening text app.
         if(result.getContents().toString().contains("SMSTO:"))
         {
+            codeType = "Text";
+
             //3 Tokens will be made, tokens[0], tokens[1], tokens[2]
             String delims1 = ":";
             String[] tokens = result.toString().split(delims1);
@@ -107,7 +148,11 @@ public class QRCodeReader extends AppCompatActivity {
             smsIntent.putExtra("sms_body",tokens[4]);
             startActivity(smsIntent);
         }
-        TextView otext = (TextView)findViewById(R.id.output_text);
+        if (result.getContents().toString().contains("SMSTO:") != true && result.getContents().toString().contains("MATMSG:") != true && result.getContents().toString().contains("http") != true)
+        {
+            codeType = "Default";
+        }
+        otext = (TextView)findViewById(R.id.output_text);
         otext.setText(result.getContents().toString());
         resultText = result.getContents().toString();
         super.onActivityResult(requestCode, resultCode, data);
