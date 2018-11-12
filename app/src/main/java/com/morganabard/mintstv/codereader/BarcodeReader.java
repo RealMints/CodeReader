@@ -17,7 +17,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class BarcodeReader extends AppCompatActivity {
@@ -31,6 +32,7 @@ public class BarcodeReader extends AppCompatActivity {
 
     private DatabaseReference databaseReference;
     private FirebaseAuth firebaseAuth;
+    private DatabaseReference rootRef;
 
 
     @Override
@@ -47,6 +49,7 @@ public class BarcodeReader extends AppCompatActivity {
         firebaseAuth = firebaseAuth.getInstance();
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
+        rootRef = FirebaseDatabase.getInstance().getReference();
 
 
         final Activity activity = this;
@@ -79,12 +82,24 @@ public class BarcodeReader extends AppCompatActivity {
                     Toast.makeText(BarcodeReader.this, "No Code has been scanned. Please scan a barcode.", Toast.LENGTH_LONG).show();
                 }else
                 {
+                    //String qrType = codeType;
+                    //String qrData = otext.getText().toString();
+
+                    //savedQRCodes savedCodes = new savedQRCodes(qrType, qrData);
+
+                    //databaseReference.child(user.getUid()).setValue(savedCodes);
+
                     String qrType = codeType;
                     String qrData = otext.getText().toString();
 
-                    savedQRCodes savedCodes = new savedQRCodes(qrType, qrData);
+                    DatabaseReference user_message_key = rootRef.child(user.getUid()).push();
+                    String idd = user_message_key.getKey();
+                    Map message = new HashMap();
+                    message.put("codeData", qrData);
+                    message.put("codeType", qrType);
+                    databaseReference.child(user.getUid()).child(idd).setValue(message);
 
-                    databaseReference.child(user.getUid()).setValue(savedCodes);
+
                     Toast.makeText(BarcodeReader.this, "This code has been saved!", Toast.LENGTH_SHORT).show();
                 }
 

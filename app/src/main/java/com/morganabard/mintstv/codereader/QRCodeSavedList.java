@@ -32,7 +32,9 @@ public class QRCodeSavedList extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private List<String> QRArrayList = new ArrayList<>();;
     private TextView textView;
-    FirebaseUser user;
+    private FirebaseUser user;
+    private DatabaseReference rootRef;
+    private  ArrayAdapter<String> arrayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +47,14 @@ public class QRCodeSavedList extends AppCompatActivity {
         firebaseAuth = firebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
         databaseReference = FirebaseDatabase.getInstance().getReference();
-        QRArrayList.add("First");
+        rootRef = FirebaseDatabase.getInstance().getReference();
 
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        FetchMessages();
+
+
+
+
+        /*databaseReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     String value1 = dataSnapshot.child(user.getUid()).child("codeData").getValue(String.class);
@@ -59,18 +66,50 @@ public class QRCodeSavedList extends AppCompatActivity {
                 public void onCancelled(@NonNull DatabaseError databaseError) {
 
                 }
-            });
+            });*/
         //databaseReference.child(user.getUid()).;
 
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
+        arrayAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_list_item_1, QRArrayList );
 
-        listView.setAdapter(arrayAdapter);
 
 
 
 
     }
+
+
+    private void FetchMessages() {
+        rootRef.child(user.getUid()).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                String x = dataSnapshot.child("codeData").getValue(String.class);
+                QRArrayList.add(x);
+                listView.setAdapter(arrayAdapter);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
 }
