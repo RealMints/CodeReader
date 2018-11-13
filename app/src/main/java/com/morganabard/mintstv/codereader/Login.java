@@ -3,9 +3,16 @@ package com.morganabard.mintstv.codereader;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,14 +34,80 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     private ProgressDialog progress;
     private FirebaseAuth firebaseAuth;
 
+    DrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+
+        android.support.v7.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar aBar = getSupportActionBar();
+
+        aBar.setDisplayHomeAsUpEnabled(true);
+        aBar.setTitle("Login to Account");
+
+        drawer = findViewById(R.id.drawer_layout);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        firebaseAuth = firebaseAuth.getInstance();
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        NavigationView navView = findViewById(R.id.nav_view);
+        navView.setNavigationItemSelectedListener(
+        new NavigationView.OnNavigationItemSelectedListener(){
+            @Override
+            public boolean onNavigationItemSelected(MenuItem menuItem) {
+                menuItem.setChecked(true);
+                drawer.closeDrawers();
+
+                if(menuItem.toString().equals("Login"))
+                {
+                    sendLogin();
+                }else if(menuItem.toString().equals("QR Code Reader")){
+                    sendQRReader();
+                }else if(menuItem.toString().equals("Saved Codes")){
+                    sendSaved();
+                }else if(menuItem.toString().equals("Barcode Reader")){
+                    sendBarcodeReader();
+                }else if(menuItem.toString().equals("Log Out"))
+                {
+                    firebaseAuth.signOut();
+                    finish();
+                    startActivity(getIntent());
+                }
+
+                return true;
+            }
+        });
+
+        firebaseAuth = firebaseAuth.getInstance();
+        View headerView = navView.getHeaderView(0);
+        TextView navUsername = headerView.findViewById(R.id.userEmail);
+        if(firebaseAuth.getCurrentUser() != null) {
+            navUsername.setText(firebaseAuth.getCurrentUser().getEmail());
+        }else{
+            navUsername.setText("Not signed in");
+        }
+
+        Menu menu = navView.getMenu();
+        MenuItem logIn = menu.findItem(R.id.nav_login);
+        if(firebaseAuth.getCurrentUser() != null) {
+            logIn.setTitle("Log Out");
+        }else{
+            logIn.setTitle("Login");
+        }
+
         reg_txt = (TextView) findViewById(R.id.reg_txt);
         progress = new ProgressDialog(this);
-        firebaseAuth = firebaseAuth.getInstance();
+
         LOGIN_btn = (Button) findViewById(R.id.LOGIN_btn);
         editTextEmail = (EditText) findViewById(R.id.editTextEmail);
         editTextPassword = (EditText) findViewById(R.id.editTextPassword);
@@ -74,7 +147,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                 {
                     Toast.makeText(Login.this, "Logged in Successfully", Toast.LENGTH_LONG).show();
                     progress.dismiss();
-                    startActivity(new Intent(Login.this, MainMenu.class));
+                    startActivity(new Intent(Login.this, QRCodeSavedList.class));
                 }else{
                     Toast.makeText(Login.this, "Could not log in, please check your Email and password are correct.", Toast.LENGTH_LONG).show();
                     progress.dismiss();
@@ -96,6 +169,44 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         if(v == LOGIN_btn)
         {
             loginUser();
+        }
+    }
+
+    public void sendLogin()
+    {
+        Intent menuIntent = new Intent(this, Login.class);
+        startActivity(menuIntent);
+    }
+
+    public void sendQRReader()
+    {
+        Intent menuIntent = new Intent(this, QRCodeReader.class);
+        startActivity(menuIntent);
+    }
+
+    public void sendBarcodeReader()
+    {
+        Intent menuIntent = new Intent(this, BarcodeReader.class);
+        startActivity(menuIntent);
+    }
+
+    public void sendSaved()
+    {
+        if(firebaseAuth.getCurrentUser() != null) {
+            Intent menuIntent = new Intent(this, QRCodeSavedList.class);
+            startActivity(menuIntent);
+        }else{
+            Toast.makeText(this, "Please Log in first.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(drawer.isDrawerOpen(GravityCompat.START))
+        {
+            drawer.closeDrawer(GravityCompat.START);
+        }else{
+            super.onBackPressed();
         }
     }
 }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_qrReader"
+            android:icon="@drawable/ic_qr_code_reader"
+            android:title="QR Code Reader" />
+        <item
+            android:id="@+id/nav_barReader"
+            android:icon="@drawable/ic_barcode_reader"
+            android:title="Barcode Reader" />
+        <item
+            android:id="@+id/nav_savedCodes"
+            android:icon="@drawable/ic_saved_code_list"
+            android:title="Saved Codes" />
+        <item
+            android:id="@+id/nav_login"
+            android:icon="@drawable/ic_login"
+            android:title="Login" />
+    </group>
+
+</menu>

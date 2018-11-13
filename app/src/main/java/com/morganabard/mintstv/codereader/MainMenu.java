@@ -1,8 +1,12 @@
 package com.morganabard.mintstv.codereader;
 
 import android.content.Intent;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.app.Activity;
@@ -21,12 +25,26 @@ public class MainMenu extends AppCompatActivity {
     private TextView currentUserText;
     private Button signout_txt;
 
+    private DrawerLayout drawer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
 
-        QR_btn = (Button) findViewById(R.id.QR_btn);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        drawer = findViewById(R.id.drawer_layout);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+
+
+        /*QR_btn = (Button) findViewById(R.id.QR_btn);
         SIGNIN_btn = (Button) findViewById(R.id.SIGNIN_btn);
         BAR_btn = (Button) findViewById(R.id.BAR_btn);
         QRList_btn = (Button) findViewById(R.id.QR_List_btn);
@@ -80,11 +98,21 @@ public class MainMenu extends AppCompatActivity {
                 Toast.makeText(MainMenu.this, "You have logged out.", Toast.LENGTH_SHORT).show();
                 updateUserTxt();
             }
-        });
+        });*/
 
     }
 
-    private void updateUserTxt()
+    @Override
+    public void onBackPressed() {
+        if(drawer.isDrawerOpen(GravityCompat.START))
+        {
+            drawer.closeDrawer(GravityCompat.START);
+        }else{
+            super.onBackPressed();
+        }
+    }
+
+    /*private void updateUserTxt()
     {
         firebaseAuth = firebaseAuth.getInstance();
         String currentUser;
@@ -106,7 +134,7 @@ public class MainMenu extends AppCompatActivity {
             SIGNIN_btn.setText("Switch Account");
         }
         return;
-    }
+    }*/
 
 
 }

@@ -1,21 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".QRCodeSavedList">
+    android:fitsSystemWindows="true"
+    android:id="@+id/drawer_layout"
+    tools:context=".QRCodeSavedList"
+    tools:openDrawer="start">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".QRCodeSavedList">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            android:elevation="4dp"
+            android:theme="@style/Base.ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/Base.ThemeOverlay.AppCompat.Light" />
+
+        <ListView
+            android:id="@+id/qr_list"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"
+            app:layout_editor_absoluteX="8dp"
+            app:layout_editor_absoluteY="8dp" />
 
 
-    <ListView
-        android:id="@+id/qr_list"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_editor_absoluteX="8dp"
-        app:layout_editor_absoluteY="8dp" />
 </android.support.constraint.ConstraintLayout>
+
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/drawer_menu" />
+
+</android.support.v4.widget.DrawerLayout>
