@@ -6,8 +6,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:id="@+id/drawer_layout"
-    tools:context=".QRCodeSavedList"
-    tools:openDrawer="start">
+    tools:context=".QRCodeSavedList">
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"

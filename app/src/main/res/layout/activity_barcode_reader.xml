@@ -6,10 +6,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:context=".BarcodeReader"
-    android:id="@+id/drawer_layout"
-    tools:openDrawer="start">
-
-
+    android:id="@+id/drawer_layout">
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
@@ -25,51 +22,76 @@
             android:theme="@style/Base.ThemeOverlay.AppCompat.Dark.ActionBar"
             app:popupTheme="@style/Base.ThemeOverlay.AppCompat.Light" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Barcode Scanner"
-        android:textSize="25dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.498" />
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="413dp"
+            android:layout_height="53dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:text="Recently Scanned"
+            android:textAlignment="center"
+            android:textSize="25dp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"
+            app:layout_editor_absoluteX="0dp"
+            app:layout_editor_absoluteY="56dp" />
 
-    <Button
-        android:id="@+id/save_btn"
-        android:layout_width="531dp"
-        android:layout_height="70dp"
-        android:layout_marginBottom="96dp"
-        android:text="Save"
-        android:textSize="25dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        <ListView
+            android:id="@+id/recent_QR"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView"
+            app:layout_editor_absoluteX="8dp"
+            app:layout_editor_absoluteY="8dp" />
 
-    <Button
-        android:id="@+id/scan_btn"
-        android:layout_width="531dp"
-        android:layout_height="70dp"
-        android:text="Click to Scan"
-        android:textSize="25dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        <Button
+            android:id="@+id/save_btn"
+            android:layout_width="102dp"
+            android:layout_height="41dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="32dp"
+            android:text="Save"
+            android:textSize="15dp"
+            app:layout_constraintBottom_toBottomOf="@+id/output_text"
+            app:layout_constraintStart_toEndOf="@+id/output_text"
+            app:layout_constraintTop_toTopOf="@+id/output_text"
+            app:layout_constraintVertical_bias="0.0" />
 
-    <TextView
-        android:id="@+id/output_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="88dp"
-        android:text="Text"
-        android:textSize="25dp"
-        app:layout_constraintHorizontal_bias="0.501"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <Button
+            android:id="@+id/scan_btn"
+            android:layout_width="229dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="16dp"
+            android:text="Open Scanner"
+            android:textSize="25dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/output_text"
+            app:layout_editor_absoluteX="91dp" />
+
+        <EditText
+            android:id="@+id/output_text"
+            android:layout_width="259dp"
+            android:layout_height="75dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginBottom="80dp"
+            android:hint="Barcode Data"
+            android:focusable="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
 </android.support.constraint.ConstraintLayout>
 
     <android.support.design.widget.NavigationView

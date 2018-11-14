@@ -1,6 +1,10 @@
 package com.morganabard.mintstv.codereader;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.design.widget.NavigationView;
@@ -8,12 +12,16 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -25,7 +33,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -43,6 +53,11 @@ public class BarcodeReader extends AppCompatActivity {
     private DatabaseReference rootRef;
 
     DrawerLayout drawer;
+
+    private ArrayAdapter<String> arrayAdapter;
+    private ListView listView;
+    private List<String> QRArrayList = new ArrayList<>();
+    private ClipboardManager clipboard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,55 +84,54 @@ public class BarcodeReader extends AppCompatActivity {
 
         NavigationView navView = findViewById(R.id.nav_view);
         navView.setNavigationItemSelectedListener(
-        new NavigationView.OnNavigationItemSelectedListener(){
-            @Override
-            public boolean onNavigationItemSelected(MenuItem menuItem) {
-                menuItem.setChecked(true);
-                drawer.closeDrawers();
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        menuItem.setChecked(true);
+                        drawer.closeDrawers();
 
-                if(menuItem.toString().equals("Login"))
-                {
-                    sendLogin();
-                }else if(menuItem.toString().equals("QR Code Reader")){
-                    sendQRReader();
-                }else if(menuItem.toString().equals("Saved Codes")){
-                    sendSaved();
-                }else if(menuItem.toString().equals("Barcode Reader")){
-                    sendBarcodeReader();
-                }else if(menuItem.toString().equals("Log Out"))
-                {
-                    firebaseAuth.signOut();
-                    finish();
-                    startActivity(getIntent());
-                }
+                        if (menuItem.toString().equals("Login")) {
+                            sendLogin();
+                        } else if (menuItem.toString().equals("QR Code Reader")) {
+                            sendQRReader();
+                        } else if (menuItem.toString().equals("Saved Codes")) {
+                            sendSaved();
+                        } else if (menuItem.toString().equals("Barcode Reader")) {
+                            sendBarcodeReader();
+                        } else if (menuItem.toString().equals("Log Out")) {
+                            firebaseAuth.signOut();
+                            finish();
+                            startActivity(getIntent());
+                        }
 
-                return true;
-            }
-        });
+                        return true;
+                    }
+                });
 
         firebaseAuth = firebaseAuth.getInstance();
         View headerView = navView.getHeaderView(0);
         TextView navUsername = headerView.findViewById(R.id.userEmail);
-        if(firebaseAuth.getCurrentUser() != null) {
+        if (firebaseAuth.getCurrentUser() != null) {
             navUsername.setText(firebaseAuth.getCurrentUser().getEmail());
-        }else{
+        } else {
             navUsername.setText("Not signed in");
         }
 
         Menu menu = navView.getMenu();
         MenuItem logIn = menu.findItem(R.id.nav_login);
-        if(firebaseAuth.getCurrentUser() != null) {
+        if (firebaseAuth.getCurrentUser() != null) {
             logIn.setTitle("Log Out");
-        }else{
+        } else {
             logIn.setTitle("Login");
         }
+
+        listView = (ListView) findViewById(R.id.recent_QR);
 
         resultText = null;
         codeType = null;
 
         scan_btn = (Button) findViewById(R.id.scan_btn);
         save_btn = (Button) findViewById(R.id.save_btn);
-
 
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -127,8 +141,7 @@ public class BarcodeReader extends AppCompatActivity {
         final Activity activity = this;
         scan_btn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
                 IntentIntegrator integrator = new IntentIntegrator(activity);
                 integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
                 integrator.setPrompt(" ");
@@ -141,19 +154,15 @@ public class BarcodeReader extends AppCompatActivity {
 
         save_btn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
 
 
                 FirebaseUser user = firebaseAuth.getCurrentUser();
-                if(user == null )
-                {
+                if (user == null) {
                     Toast.makeText(BarcodeReader.this, "This code has NOT been saved. Please login to save codes.", Toast.LENGTH_LONG).show();
-                }else if(resultText == null || codeType == null)
-                {
+                } else if (resultText == null || codeType == null) {
                     Toast.makeText(BarcodeReader.this, "No Code has been scanned. Please scan a barcode.", Toast.LENGTH_LONG).show();
-                }else
-                {
+                } else {
                     //String qrType = codeType;
                     //String qrData = otext.getText().toString();
 
@@ -177,71 +186,88 @@ public class BarcodeReader extends AppCompatActivity {
 
             }
         });
+
+        arrayAdapter = new ArrayAdapter<String>(
+                this,
+                android.R.layout.simple_list_item_1, QRArrayList);
+
+        listView.setAdapter(arrayAdapter);
+
+        clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Get the selected item text from ListView
+                String selectedItem = (String) parent.getItemAtPosition(position);
+
+                // Display the selected item text on TextView
+                ClipData clip = ClipData.newPlainText("Copied Text", selectedItem);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(BarcodeReader.this, "Copied " + selectedItem + " to clipboard.", Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null)
-        {
-            if(result.getContents() == null)
-            {
+        if (result != null) {
+            if (result.getContents() == null) {
                 Toast.makeText(this, "You Cancelled the Scanning.", Toast.LENGTH_LONG).show();
-            }
-            else
-            {
+            } else {
                 Toast.makeText(this, result.getContents(), Toast.LENGTH_LONG).show();
             }
-        }
-        else
-        {
+        } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
 
         //Set value to output text
-        otext = (TextView)findViewById(R.id.output_text);
+        otext = (TextView) findViewById(R.id.output_text);
         otext.setText(result.getContents().toString());
         resultText = otext.getText().toString();
         codeType = "Barcode";
+
+        otext.setFocusableInTouchMode(true);
+        if (QRArrayList.size() >= 6) {
+            QRArrayList.remove(5);
+        }
+        QRArrayList.add(result.getContents().toString());
+        listView.setAdapter(arrayAdapter);
+
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void sendLogin()
-    {
+    public void sendLogin() {
         Intent menuIntent = new Intent(this, Login.class);
         startActivity(menuIntent);
     }
 
-    public void sendQRReader()
-    {
+    public void sendQRReader() {
         Intent menuIntent = new Intent(this, QRCodeReader.class);
         startActivity(menuIntent);
     }
 
-    public void sendBarcodeReader()
-    {
+    public void sendBarcodeReader() {
         Intent menuIntent = new Intent(this, BarcodeReader.class);
         startActivity(menuIntent);
     }
 
-    public void sendSaved()
-    {
-        if(firebaseAuth.getCurrentUser() != null) {
+    public void sendSaved() {
+        if (firebaseAuth.getCurrentUser() != null) {
             Intent menuIntent = new Intent(this, QRCodeSavedList.class);
             startActivity(menuIntent);
-        }else{
+        } else {
             Toast.makeText(this, "Please Log in first.", Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
     public void onBackPressed() {
-        if(drawer.isDrawerOpen(GravityCompat.START))
-        {
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        }else{
+        } else {
             super.onBackPressed();
         }
     }

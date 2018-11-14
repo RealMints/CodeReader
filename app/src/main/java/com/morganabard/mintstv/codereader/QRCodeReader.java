@@ -1,6 +1,10 @@
 package com.morganabard.mintstv.codereader;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.design.widget.NavigationView;
@@ -8,12 +12,17 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,14 +33,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class QRCodeReader extends AppCompatActivity {
     private Button scan_btn;
     private Button save_btn;
     private String resultText;
-    private TextView otext;
+    private EditText otext;
     private String codeType;
 
     private DatabaseReference databaseReference;
@@ -43,6 +54,11 @@ public class QRCodeReader extends AppCompatActivity {
 
     private FirebaseUser user;
 
+    private ArrayAdapter<String> arrayAdapter;
+    private ListView listView;
+    private List<String> QRArrayList = new ArrayList<>();
+    ;
+    private ClipboardManager clipboard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,13 +95,12 @@ public class QRCodeReader extends AppCompatActivity {
                         drawer.closeDrawers();
 
                         if (menuItem.toString().equals("Login")) {
-                                sendLogin();
+                            sendLogin();
                         } else if (menuItem.toString().equals("Saved Codes")) {
                             sendSaved();
                         } else if (menuItem.toString().equals("Barcode Reader")) {
                             sendBarcodeReader();
-                        }else if(menuItem.toString().equals("Log Out"))
-                        {
+                        } else if (menuItem.toString().equals("Log Out")) {
                             firebaseAuth.signOut();
                             finish();
                             startActivity(getIntent());
@@ -98,24 +113,29 @@ public class QRCodeReader extends AppCompatActivity {
 
         View headerView = navigationView.getHeaderView(0);
         TextView navUsername = headerView.findViewById(R.id.userEmail);
-        if(firebaseAuth.getCurrentUser() != null) {
+        if (firebaseAuth.getCurrentUser() != null) {
             navUsername.setText(firebaseAuth.getCurrentUser().getEmail());
-        }else{
+        } else {
             navUsername.setText("Not signed in");
         }
 
         Menu menu = navigationView.getMenu();
         MenuItem logIn = menu.findItem(R.id.nav_login);
-        if(firebaseAuth.getCurrentUser() != null) {
+        if (firebaseAuth.getCurrentUser() != null) {
             logIn.setTitle("Log Out");
-        }else{
+        } else {
             logIn.setTitle("Login");
         }
+
+
+        listView = (ListView) findViewById(R.id.recent_QR);
+
 
         resultText = null;
         codeType = null;
         scan_btn = (Button) findViewById(R.id.scan_btn);
         save_btn = (Button) findViewById(R.id.save_btn);
+        QRArrayList.clear();
 
         firebaseAuth = firebaseAuth.getInstance();
 
@@ -155,9 +175,30 @@ public class QRCodeReader extends AppCompatActivity {
                     databaseReference.child(user.getUid()).child(idd).setValue(message);
                     Toast.makeText(QRCodeReader.this, "This code has been saved!", Toast.LENGTH_SHORT).show();
                 }
-
             }
         });
+
+        arrayAdapter = new ArrayAdapter<String>(
+                this,
+                android.R.layout.simple_list_item_1, QRArrayList);
+
+        listView.setAdapter(arrayAdapter);
+
+        clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Get the selected item text from ListView
+                String selectedItem = (String) parent.getItemAtPosition(position);
+
+                // Display the selected item text on TextView
+                ClipData clip = ClipData.newPlainText("Copied Text", selectedItem);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(QRCodeReader.this, "Copied " + selectedItem + " to clipboard.", Toast.LENGTH_LONG).show();
+            }
+        });
+
+
     }
 
     @Override
@@ -220,15 +261,22 @@ public class QRCodeReader extends AppCompatActivity {
         if (result.getContents().toString().contains("SMSTO:") != true && result.getContents().toString().contains("MATMSG:") != true && result.getContents().toString().contains("http") != true) {
             codeType = "Default";
         }
-        otext = (TextView) findViewById(R.id.output_text);
+        otext = findViewById(R.id.output_text);
         otext.setText(result.getContents().toString());
         resultText = result.getContents().toString();
+        otext.setFocusableInTouchMode(true);
+        if (QRArrayList.size() >= 6) {
+            QRArrayList.remove(5);
+        }
+        QRArrayList.add(result.getContents().toString());
+        listView.setAdapter(arrayAdapter);
+
         super.onActivityResult(requestCode, resultCode, data);
     }
 
     public void sendLogin() {
-            Intent menuIntent = new Intent(this, Login.class);
-            startActivity(menuIntent);
+        Intent menuIntent = new Intent(this, Login.class);
+        startActivity(menuIntent);
     }
 
     public void sendQRReader() {
@@ -242,24 +290,22 @@ public class QRCodeReader extends AppCompatActivity {
     }
 
     public void sendSaved() {
-        if(firebaseAuth.getCurrentUser() != null) {
+        if (firebaseAuth.getCurrentUser() != null) {
             Intent menuIntent = new Intent(this, QRCodeSavedList.class);
             startActivity(menuIntent);
-        }else{
+        } else {
             Toast.makeText(this, "Please Log in first.", Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
     public void onBackPressed() {
-        if(drawer.isDrawerOpen(GravityCompat.START))
-        {
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        }else{
+        } else {
             super.onBackPressed();
         }
     }
-
 
 
 }
